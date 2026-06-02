@@ -1,10 +1,8 @@
 #include <stdio.h>
 #include "pico/stdlib.h"
-#include "hardware/gpio.h"
-#include "hardware/pio.h"
 
-#include "WS2812.pio.h" // This header file gets produced during compilation from the WS2812.pio file
 #include "drivers/logging/logging.h"
+#include "drivers/leds.h"
 
 #define LED_PIN 14
 
@@ -12,27 +10,69 @@ int main()
 {
     stdio_init_all();
 
-    // Initialise PIO0 to control the LED chain
-    uint pio_program_offset = pio_add_program(pio0, &ws2812_program);
-    ws2812_program_init(pio0, 0, pio_program_offset, LED_PIN, 800000, false);
-    uint32_t led_data [1];
+    leds_init(pio0, 0, LED_PIN);
 
-    for (;;) {
-        // Test the log system
-        log(LogLevel::INFORMATION, "Hello world");
+    while (true)
+    {
+        log(LogLevel::INFORMATION, "Lab 2 LED Driver Demo");
 
-        // Turn on the first LED to be a certain colour
-        uint8_t red = 0;
-        uint8_t green = 0;
-        uint8_t blue = 255;
-        led_data[0] = (red << 24) | (green << 16) | (blue << 8);
-        pio_sm_put_blocking(pio0, 0, led_data[0]);
-        sleep_ms(500);
+        // Requirement 3: turn all LEDs off
+        leds_clear();
+        leds_commit();
+        sleep_ms(1000);
 
-        // Set the first LED off 
-        led_data[0] = 0;
-        pio_sm_put_blocking(pio0, 0, led_data[0]);
-        sleep_ms(500);
+        // Requirement 1:
+        // Driver remembers previous LED states
+        for (uint i = 0; i < NUM_LEDS; i++)
+        {
+            switch (i % 6)
+            {
+                case 0:
+                    leds_set(i, 255, 0, 0);     // Red
+                    break;
+
+                case 1:
+                    leds_set(i, 0, 255, 0);     // Green
+                    break;
+
+                case 2:
+                    leds_set(i, 0, 0, 255);     // Blue
+                    break;
+
+                case 3:
+                    leds_set(i, 255, 255, 0);   // Yellow
+                    break;
+
+                case 4:
+                    leds_set(i, 255, 0, 255);   // Purple
+                    break;
+
+                case 5:
+                    leds_set(i, 0, 255, 255);   // Cyan
+                    break;
+            }
+
+            leds_commit();
+            sleep_ms(500);
+        }
+
+        // Requirement 2:
+        // Multiple changes before one commit
+        leds_set(0, 255, 255, 255);
+        leds_set(1, 255, 255, 255);
+        leds_set(2, 255, 255, 255);
+        leds_set(3, 255, 255, 255);
+
+        // Nothing changes until this commit
+        leds_commit();
+
+        sleep_ms(2000);
+
+        // Requirement 3 again
+        leds_clear();
+        leds_commit();
+
+        sleep_ms(2000);
     }
 
     return 0;
