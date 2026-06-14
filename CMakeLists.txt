@@ -39,11 +39,13 @@ if(CrossCompiling)
 
     add_executable(labs)
 
-    target_sources(labs
+    target_sources(labs 
         PUBLIC
         src/main.cpp
         src/drivers/leds.cpp
         src/drivers/logging/logging.cpp
+        src/drivers/lis3dh/lis3dh.cpp
+        src/tasks/spirit_level.cpp
     )
 
     target_include_directories(labs
@@ -88,6 +90,8 @@ else()
         src/main.cpp
         src/drivers/leds.cpp
         src/drivers/logging/logging.cpp
+        src/drivers/lis3dh/lis3dh.cpp
+        src/tasks/spirit_level.cpp
         tests/mocks/pico/stdlib.cpp
         tests/mocks/pico/time.cpp
         tests/mocks/hardware/gpio.cpp
