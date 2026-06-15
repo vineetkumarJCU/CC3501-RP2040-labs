@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
 
-# == DO NOT EDIT THE FOLLOWING LINES for the Raspberry Pi Pico VS Code Extension to work ==
 if(WIN32)
     set(USERHOME $ENV{USERPROFILE})
 else()
@@ -13,7 +12,6 @@ set(picoVscode ${USERHOME}/.pico-sdk/cmake/pico-vscode.cmake)
 if (EXISTS ${picoVscode})
     include(${picoVscode})
 endif()
-# ====================================================================================
 
 set(PICO_BOARD pico CACHE STRING "Board type")
 
@@ -45,6 +43,7 @@ if(CrossCompiling)
         src/drivers/leds.cpp
         src/drivers/logging/logging.cpp
         src/drivers/lis3dh/lis3dh.cpp
+        src/drivers/microphone/microphone.cpp
         src/tasks/spirit_level.cpp
     )
 
@@ -65,6 +64,7 @@ if(CrossCompiling)
         pico_stdlib
         hardware_spi
         hardware_i2c
+        hardware_adc
         hardware_dma
         hardware_pio
         hardware_interp
@@ -91,6 +91,7 @@ else()
         src/drivers/leds.cpp
         src/drivers/logging/logging.cpp
         src/drivers/lis3dh/lis3dh.cpp
+        src/drivers/microphone/microphone.cpp
         src/tasks/spirit_level.cpp
         tests/mocks/pico/stdlib.cpp
         tests/mocks/pico/time.cpp

@@ -7,6 +7,8 @@
 #define NUM_LEDS 12
 #define LED_PIO pio0
 #define LED_SM 0
+#define MIC_ADC_PIN 26
+#define MIC_ADC_INPUT 0
 
 // LIS3DH I2C configuration
 #define LIS3DH_I2C_PORT i2c0
