@@ -19,6 +19,7 @@ static q15_t fft_output[FFT_LENGTH];
 static q15_t mag_squared[FFT_BINS];
 
 static arm_rfft_instance_q15 fft_instance;
+static bool initialised = false;
 
 static const uint16_t band_edges[13] = {
     6, 8, 11, 16, 24, 35, 51, 75, 110, 161, 237, 349, 513
@@ -56,11 +57,11 @@ static void display_audio_on_leds()
 
         if (energy > 20) {
             if (led < 4) {
-                leds_set(led, 0, 0, 255);       // low frequencies blue
+                leds_set(led, 0, 0, 255);
             } else if (led < 8) {
-                leds_set(led, 0, 255, 0);       // middle frequencies green
+                leds_set(led, 0, 255, 0);
             } else {
-                leds_set(led, 255, 0, 0);       // high frequencies red
+                leds_set(led, 255, 0, 0);
             }
         }
     }
@@ -68,60 +69,67 @@ static void display_audio_on_leds()
     leds_commit();
 }
 
-void audio_task(void)
+void audio_init(void)
 {
+    if (initialised) {
+        return;
+    }
+
     microphone_init();
 
     arm_status status = arm_rfft_init_q15(&fft_instance, FFT_LENGTH, 0, 1);
 
     if (status != ARM_MATH_SUCCESS) {
         printf("FFT init failed\n");
-        while (true) {
-            leds_clear();
-            leds_commit();
-            sleep_ms(500);
-        }
+        return;
     }
 
     printf("Audio FFT task started\n");
+    initialised = true;
+}
 
-    while (true) {
-        microphone_read(adc_samples, FFT_LENGTH);
-
-        int32_t sum = 0;
-
-        for (int i = 0; i < FFT_LENGTH; i++) {
-            sum += adc_samples[i];
-        }
-
-        int32_t dc_bias = sum / FFT_LENGTH;
-
-        for (int i = 0; i < FFT_LENGTH; i++) {
-            int32_t centred = (int32_t)adc_samples[i] - dc_bias;
-
-            centred = centred << 5;
-
-            if (centred > 32767) {
-                centred = 32767;
-            }
-
-            if (centred < -32768) {
-                centred = -32768;
-            }
-
-            time_signal[i] = (q15_t)centred;
-        }
-
-        apply_simple_hanning_window();
-
-        arm_rfft_q15(&fft_instance, time_signal, fft_output);
-
-        arm_cmplx_mag_squared_q15(fft_output, mag_squared, FFT_BINS);
-
-        display_audio_on_leds();
-
-        printf("Audio FFT updated. DC bias=%ld\n", dc_bias);
-
-        sleep_ms(100);
+void audio_step(void)
+{
+    if (!initialised) {
+        audio_init();
+        return;
     }
+
+    microphone_read(adc_samples, FFT_LENGTH);
+
+    int32_t sum = 0;
+
+    for (int i = 0; i < FFT_LENGTH; i++) {
+        sum += adc_samples[i];
+    }
+
+    int32_t dc_bias = sum / FFT_LENGTH;
+
+    for (int i = 0; i < FFT_LENGTH; i++) {
+        int32_t centred = (int32_t)adc_samples[i] - dc_bias;
+
+        centred = centred << 5;
+
+        if (centred > 32767) {
+            centred = 32767;
+        }
+
+        if (centred < -32768) {
+            centred = -32768;
+        }
+
+        time_signal[i] = (q15_t)centred;
+    }
+
+    apply_simple_hanning_window();
+
+    arm_rfft_q15(&fft_instance, time_signal, fft_output);
+
+    arm_cmplx_mag_squared_q15(fft_output, mag_squared, FFT_BINS);
+
+    display_audio_on_leds();
+
+    printf("Audio FFT updated. DC bias=%ld\n", dc_bias);
+
+    sleep_ms(100);
 }

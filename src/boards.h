@@ -10,6 +10,8 @@
 #define MIC_ADC_PIN 26
 #define MIC_ADC_INPUT 0
 
+#define BUTTON_PIN 15
+
 // LIS3DH I2C configuration
 #define LIS3DH_I2C_PORT i2c0
 #define LIS3DH_PIN_SDA 16

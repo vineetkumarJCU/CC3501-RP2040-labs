@@ -1,3 +1,4 @@
 #pragma once
 
-void audio_task(void);
+void audio_init(void);
+void audio_step(void);
