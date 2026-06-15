@@ -35,6 +35,28 @@ if(CrossCompiling)
 
     pico_sdk_init()
 
+    # Set up CMSIS-DSP
+    set(CMSISCORE "${CMAKE_CURRENT_LIST_DIR}/lib/CMSIS_5/CMSIS/Core")
+
+    set(BASICMATH ON)
+    set(COMPLEXMATH ON)
+    set(CONTROLLER OFF)
+    set(FASTMATH OFF)
+    set(FILTERING OFF)
+    set(MATRIX OFF)
+    set(STATISTICS OFF)
+    set(SUPPORT OFF)
+    set(TRANSFORM ON)
+    set(SVM OFF)
+    set(BAYES OFF)
+    set(DISTANCE OFF)
+    set(INTERPOLATION OFF)
+    set(QUATERNIONMATH OFF)
+    set(CONFIGTABLE ON)
+    set(RFFT_Q15_1024 ON)
+
+    add_subdirectory(lib/CMSIS-DSP/Source bin_dsp)
+
     add_executable(labs)
 
     target_sources(labs 
@@ -45,6 +67,7 @@ if(CrossCompiling)
         src/drivers/lis3dh/lis3dh.cpp
         src/drivers/microphone/microphone.cpp
         src/tasks/spirit_level.cpp
+        src/tasks/audio_task.cpp
     )
 
     target_include_directories(labs
@@ -62,6 +85,7 @@ if(CrossCompiling)
 
     target_link_libraries(labs
         pico_stdlib
+        CMSISDSP
         hardware_spi
         hardware_i2c
         hardware_adc
