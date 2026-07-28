@@ -30,6 +30,7 @@ static bool button_pressed()
     return false;
 }
 
+// Lab 2 LED demo mode, cycles through different colors on the LEDs
 static void lab2_led_demo_step()
 {
     static int stage = 0;
@@ -95,6 +96,8 @@ static void lab2_led_demo_step()
     }
 }
 
+// Function to change the current mode when the button is pressed
+
 static void change_mode()
 {
     current_mode = (Mode)((current_mode + 1) % 3);
@@ -121,6 +124,7 @@ int main()
 {
     stdio_init_all();
 
+    // Initialize the LEDs and button GPIO
     leds_init(LED_PIO, LED_SM, LED_PIN);
 
     gpio_init(BUTTON_PIN);

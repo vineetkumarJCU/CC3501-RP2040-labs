@@ -25,6 +25,7 @@ static const uint16_t band_edges[13] = {
     6, 8, 11, 16, 24, 35, 51, 75, 110, 161, 237, 349, 513
 };
 
+// Simple Hanning window implementation to reduce spectral leakage
 static void apply_simple_hanning_window()
 {
     for (int i = 0; i < FFT_LENGTH; i++) {
@@ -40,6 +41,8 @@ static void apply_simple_hanning_window()
         time_signal[i] = (q15_t)(value >> 15);
     }
 }
+
+// Map the FFT magnitudes to LED colors and brightness
 
 static void display_audio_on_leds()
 {
@@ -69,6 +72,8 @@ static void display_audio_on_leds()
     leds_commit();
 }
 
+// Initialize the audio task, including microphone and FFT setup
+
 void audio_init(void)
 {
     if (initialised) {
@@ -88,6 +93,7 @@ void audio_init(void)
     initialised = true;
 }
 
+// Main step function for the audio task, called repeatedly in the main loop
 void audio_step(void)
 {
     if (!initialised) {
@@ -95,6 +101,7 @@ void audio_step(void)
         return;
     }
 
+    // Read audio samples from the microphone and store them in adc_samples
     microphone_read(adc_samples, FFT_LENGTH);
 
     int32_t sum = 0;
@@ -121,6 +128,7 @@ void audio_step(void)
         time_signal[i] = (q15_t)centred;
     }
 
+    
     apply_simple_hanning_window();
 
     arm_rfft_q15(&fft_instance, time_signal, fft_output);
